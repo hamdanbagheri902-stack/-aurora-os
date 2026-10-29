@@ -1,0 +1,30 @@
+#!/bin/sh
+# 0300 — store grub-pc (BIOS) and grub-efi-amd64 (UEFI) packages inside the
+# image. They conflict with each other, so the installer installs the one
+# matching how the PC booted (see usr/lib/@@OS_ID@@-installer/target-prepare).
+set -e
+export DEBIAN_FRONTEND=noninteractive
+DEST=/usr/lib/@@OS_ID@@-installer/debs
+DL=/tmp/@@OS_ID@@-grub-dl
+
+rm -rf "$DEST" "$DL"
+mkdir -p "$DEST/bios" "$DEST/efi"
+
+for mode in bios efi; do
+    case "$mode" in
+        bios) pkg=grub-pc ;;
+        efi)  pkg=grub-efi-amd64 ;;
+    esac
+    mkdir -p "$DL/partial"
+    apt-get -o Dir::Cache::archives="$DL" -y --download-only install "$pkg"
+    if ls "$DL"/*.deb >/dev/null 2>&1; then
+        mv "$DL"/*.deb "$DEST/$mode/"
+    fi
+    rm -rf "$DL"
+done
+
+ls -l "$DEST/bios" "$DEST/efi"
+ls "$DEST/bios"/grub-pc_*.deb >/dev/null || { echo "E: grub-pc .deb missing"; exit 1; }
+if ! dpkg -s grub-efi-amd64 >/dev/null 2>&1; then
+    ls "$DEST/efi"/grub-efi-amd64_*.deb >/dev/null || { echo "E: grub-efi-amd64 .deb missing"; exit 1; }
+fi

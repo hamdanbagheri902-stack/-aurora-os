@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Install @@OS_NAME@@
+GenericName=System installer
+Comment=Install @@OS_NAME@@ on this computer
+Exec=/usr/bin/@@OS_ID@@-install
+Icon=calamares
+Terminal=false
+Categories=System;
+Keywords=install;installer;calamares;

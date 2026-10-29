@@ -1,0 +1,14 @@
+# Hardware support for real PCs (Wi-Fi, GPUs, sound, CPU microcode).
+# All in "non-free-firmware". Run ./check-packages.sh if Debian renames any.
+firmware-linux
+firmware-linux-nonfree
+firmware-misc-nonfree
+firmware-amd-graphics
+firmware-realtek
+firmware-iwlwifi
+firmware-atheros
+firmware-brcm80211
+firmware-sof-signed
+bluez-firmware
+intel-microcode
+amd64-microcode

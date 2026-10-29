@@ -1,0 +1,16 @@
+# Live session only (kernel command line contains boot=live):
+# makes sure the live user exists, logs in automatically, may run the
+# installer, and puts an "Install" icon on the desktop.
+[Unit]
+Description=@@OS_NAME@@ live session setup
+ConditionKernelCommandLine=boot=live
+After=live-config.service systemd-user-sessions.service
+Before=display-manager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/@@OS_ID@@-installer/live-setup
+RemainAfterExit=yes
+
+[Install]
+WantedBy=graphical.target

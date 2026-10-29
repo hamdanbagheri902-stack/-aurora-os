@@ -1,0 +1,40 @@
+#!/bin/sh
+# target-prepare — Calamares step "shellprocess@before_bootloader".
+# Runs INSIDE the freshly copied system (chroot), before GRUB is installed.
+set -eu
+export DEBIAN_FRONTEND=noninteractive
+DEBS=/usr/lib/@@OS_ID@@-installer/debs
+
+if [ -d /sys/firmware/efi ]; then MODE=efi; else MODE=bios; fi
+echo "target-prepare: this PC booted in $MODE mode"
+
+# 1. Make sure a kernel image is in /boot (normally copied from the image).
+if ! ls /boot/vmlinuz-* >/dev/null 2>&1; then
+    set -- /lib/modules/*
+    if [ "$#" -eq 1 ] && [ -d "$1" ] && [ -f /run/live/medium/live/vmlinuz ]; then
+        cp /run/live/medium/live/vmlinuz "/boot/vmlinuz-$(basename "$1")"
+        echo "target-prepare: copied kernel from the live medium"
+    else
+        echo "target-prepare: ERROR: no kernel image found" >&2
+        exit 1
+    fi
+fi
+
+# 2. Install the matching GRUB package from the copies stored in the image.
+if [ "$MODE" = bios ]; then
+    echo "grub-pc grub-pc/install_devices_empty boolean true" | debconf-set-selections
+fi
+if ls "$DEBS/$MODE"/*.deb >/dev/null 2>&1; then
+    apt-get install -y --no-download --allow-downgrades "$DEBS/$MODE"/*.deb
+else
+    echo "target-prepare: no stored packages for $MODE (already installed?)"
+fi
+
+# 3. Let GRUB list Windows / other OSes on dual-boot PCs.
+if [ -f /etc/default/grub ]; then
+    if grep -q '^#\{0,1\}GRUB_DISABLE_OS_PROBER=' /etc/default/grub; then
+        sed -i 's/^#\{0,1\}GRUB_DISABLE_OS_PROBER=.*/GRUB_DISABLE_OS_PROBER=false/' /etc/default/grub
+    else
+        echo 'GRUB_DISABLE_OS_PROBER=false' >> /etc/default/grub
+    fi
+fi

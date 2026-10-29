@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Enable tap-to-click
+Comment=Turns on tap-to-click for touchpads until the user changes it in Settings
+Exec=/usr/lib/@@OS_ID@@-installer/touchpad-tap
+OnlyShowIn=KDE;
+NoDisplay=true
+X-KDE-autostart-phase=2

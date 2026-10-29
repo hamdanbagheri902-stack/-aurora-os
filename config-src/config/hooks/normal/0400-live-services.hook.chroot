@@ -1,0 +1,9 @@
+#!/bin/sh
+# 0400 — enable the live-only setup service and fix permissions.
+set -e
+chmod 0755 /usr/bin/@@OS_ID@@-install /usr/lib/@@OS_ID@@-installer/live-setup \
+           /usr/lib/@@OS_ID@@-installer/target-prepare /usr/lib/@@OS_ID@@-installer/target-cleanup \
+           /usr/lib/@@OS_ID@@-installer/touchpad-tap
+systemctl enable @@OS_ID@@-live-setup.service
+systemctl set-default graphical.target
+systemctl enable NetworkManager.service || true

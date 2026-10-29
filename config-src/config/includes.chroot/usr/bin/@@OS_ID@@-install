@@ -1,0 +1,7 @@
+#!/bin/sh
+# @@OS_ID@@-install — start the Calamares installer as root from the live
+# desktop. Works in X11 and Wayland (Calamares runs through XWayland there).
+xhost +si:localuser:root >/dev/null 2>&1 || true
+exec pkexec env DISPLAY="${DISPLAY:-:0}" XAUTHORITY="${XAUTHORITY:-}" \
+    QT_QPA_PLATFORM=xcb \
+    calamares -d "$@"

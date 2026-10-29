@@ -1,0 +1,8 @@
+# Phase 1: a minimal KDE Plasma 6 desktop, enough to run the installer and
+# test the mouse. Phase 2 extends this into the full Windows 11-style desktop.
+kde-plasma-desktop
+sddm
+plasma-nm
+konsole
+dolphin
+firefox-esr

@@ -1,0 +1,23 @@
+#!/bin/sh
+# touchpad-tap — enable tap-to-click on every touchpad in Plasma Wayland.
+# libinput ships with tapping off; KWin stores user changes in kcminputrc.
+# If the user has already chosen a tap setting there, we leave it alone.
+[ "${XDG_SESSION_TYPE:-}" = "wayland" ] || exit 0
+command -v busctl >/dev/null || exit 0
+CFG="${XDG_CONFIG_HOME:-$HOME/.config}/kcminputrc"
+if [ -f "$CFG" ] && grep -q '^TapToClick=' "$CFG"; then
+    exit 0
+fi
+
+sleep 3  # let KWin publish its input devices
+DEVICES="$(busctl --user get-property org.kde.KWin /org/kde/KWin/InputDevice \
+    org.kde.KWin.InputDeviceManager devicesSysNames 2>/dev/null \
+    | tr ' ' '\n' | sed -n 's/^"\(event[0-9]*\)"$/\1/p')"
+
+for dev in $DEVICES; do
+    path="/org/kde/KWin/InputDevice/$dev"
+    is_tp="$(busctl --user get-property org.kde.KWin "$path" org.kde.KWin.InputDevice touchpad 2>/dev/null || true)"
+    if [ "$is_tp" = "b true" ]; then
+        busctl --user set-property org.kde.KWin "$path" org.kde.KWin.InputDevice tapToClick b true || true
+    fi
+done

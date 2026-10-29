@@ -1,0 +1,26 @@
+# Input drivers loaded early from the initramfs, so keyboards, mice and
+# touchpads work at the disk-unlock prompt, in emergency shells and right
+# after boot. Names built into the Debian kernel are simply skipped.
+
+# USB host controllers (USB 3 / USB 2 / USB 1.1)
+xhci_pci
+xhci_hcd
+ehci_pci
+ehci_hcd
+ohci_pci
+uhci_hcd
+
+# USB HID: keyboards, mice, VirtualBox "USB Tablet"
+usbhid
+hid_generic
+hid_multitouch
+hid_logitech_dj
+hid_apple
+
+# Laptop touchpads/keyboards on I2C and PS/2
+i2c_hid_acpi
+i2c_hid
+psmouse
+i8042
+atkbd
+evdev

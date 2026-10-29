@@ -1,0 +1,10 @@
+#!/bin/sh
+# 9000 — rebuild the initramfs so the early input modules listed in
+# /usr/share/initramfs-tools/modules.d/@@OS_ID@@-input are inside it.
+set -e
+update-initramfs -u -k all
+for i in /boot/initrd.img-*; do
+    echo "I: checking $i for input drivers"
+    lsinitramfs "$i" | grep -E '/(usbhid|hid-generic|hid-multitouch|psmouse|xhci-pci)\.ko' || \
+        echo "W: some input modules not found as files in $i (they may be built into the kernel)"
+done

@@ -1,0 +1,43 @@
+# Calamares branding for @@OS_NAME@@.
+# The PNG files next to this file are drawn by tools/make-branding.py.
+---
+componentName:  @@OS_ID@@
+
+welcomeStyleCalamares:   false
+welcomeExpandingLogo:    true
+windowExpanding:         normal
+windowSize:              920px,620px
+windowPlacement:         center
+sidebar:                 widget
+navigation:              widget
+
+strings:
+    productName:         "@@OS_NAME@@"
+    shortProductName:    "@@OS_NAME@@"
+    version:             "@@OS_VERSION@@"
+    shortVersion:        "@@OS_VERSION@@"
+    versionedName:       "@@OS_NAME@@ @@OS_VERSION@@"
+    shortVersionedName:  "@@OS_NAME@@ @@OS_VERSION@@"
+    bootloaderEntryName: "@@OS_NAME@@"
+    productUrl:          ""
+    supportUrl:          ""
+    knownIssuesUrl:      ""
+    releaseNotesUrl:     ""
+    donateUrl:           ""
+
+images:
+    productLogo:         "logo.png"
+    productIcon:         "logo.png"
+    productWelcome:      "welcome.png"
+
+# A list of images = simple picture slideshow during installation.
+slideshow:
+    - "slide1.png"
+    - "slide2.png"
+    - "slide3.png"
+
+style:
+    SidebarBackground:        "#0a1028"
+    SidebarText:              "#e8f0ff"
+    SidebarTextCurrent:       "#ffffff"
+    SidebarBackgroundCurrent: "#2f6fe0"

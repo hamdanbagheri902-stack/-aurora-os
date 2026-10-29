@@ -1,0 +1,33 @@
+# Live session
+live-boot
+live-config
+live-config-systemd
+sudo
+
+# Installer (Calamares) and what our installer flow needs
+calamares
+pkexec
+polkitd
+x11-xserver-utils
+
+# Bootloader pieces the installer puts on the installed system.
+# grub-pc and grub-efi-amd64 conflict, so they are NOT installed here:
+# hook 0300 stores them and the installer picks the right one (BIOS/UEFI).
+grub-common
+grub2-common
+grub-pc-bin
+grub-efi-amd64-bin
+grub-efi-amd64-signed
+shim-signed
+efibootmgr
+os-prober
+dosfstools
+cryptsetup
+initramfs-tools
+
+# Basics
+locales
+console-setup
+keyboard-configuration
+network-manager
+ca-certificates

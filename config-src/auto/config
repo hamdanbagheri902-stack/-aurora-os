@@ -1,0 +1,32 @@
+#!/bin/sh
+# auto/config — the live-build settings for @@OS_NAME@@ (run by "lb config").
+set -e
+
+lb config noauto \
+    --mode debian \
+    --distribution trixie \
+    --architecture amd64 \
+    --archive-areas "main contrib non-free non-free-firmware" \
+    --mirror-bootstrap "@@DEBIAN_MIRROR@@" \
+    --mirror-chroot "@@DEBIAN_MIRROR@@" \
+    --mirror-binary "@@DEBIAN_MIRROR@@" \
+    --mirror-chroot-security "http://security.debian.org/debian-security/" \
+    --mirror-binary-security "http://security.debian.org/debian-security/" \
+    --security true \
+    --updates true \
+    --linux-flavours amd64 \
+    --firmware-chroot true \
+    --apt-recommends true \
+    --binary-images iso-hybrid \
+    --bootloaders "syslinux,grub-efi" \
+    --uefi-secure-boot enable \
+    --debian-installer none \
+    --memtest none \
+    --checksums sha256 \
+    --image-name "@@OS_ID@@" \
+    --iso-application "@@OS_NAME@@" \
+    --iso-publisher "@@OS_NAME@@ project" \
+    --iso-volume "@@OS_NAME@@ @@OS_VERSION@@" \
+    --bootappend-live "boot=live components quiet username=@@LIVE_USER@@ hostname=@@OS_ID@@ locales=en_US.UTF-8 keyboard-layouts=us" \
+    --cache-packages true \
+    "${@}"

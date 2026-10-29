@@ -1,0 +1,55 @@
+#!/bin/sh
+# live-setup — runs once per live boot (see @@OS_ID@@-live-setup.service).
+# Everything written here lives in the RAM overlay and never reaches an
+# installed system (the installer copies the read-only squashfs instead).
+set -eu
+
+LIVE_USER="$(sed -n 's/.*\busername=\([^ ]*\).*/\1/p' /proc/cmdline)"
+LIVE_USER="${LIVE_USER:-@@LIVE_USER@@}"
+
+# 1. Live user (live-config normally creates it; this is a safety net).
+if ! id "$LIVE_USER" >/dev/null 2>&1; then
+    EXTRA_GROUPS=""
+    for g in sudo audio video cdrom plugdev netdev users dip bluetooth; do
+        getent group "$g" >/dev/null && EXTRA_GROUPS="${EXTRA_GROUPS:+$EXTRA_GROUPS,}$g"
+    done
+    useradd -m -s /bin/bash -c "Live user" ${EXTRA_GROUPS:+-G "$EXTRA_GROUPS"} "$LIVE_USER"
+    passwd -d "$LIVE_USER"
+fi
+printf '%s ALL=(ALL) NOPASSWD: ALL\n' "$LIVE_USER" > /etc/sudoers.d/90-live-user
+chmod 0440 /etc/sudoers.d/90-live-user
+
+# 2. Polkit: the live user may run the installer without a password prompt.
+mkdir -p /etc/polkit-1/rules.d
+cat > /etc/polkit-1/rules.d/49-live-user.rules <<RULES
+polkit.addRule(function(action, subject) {
+    if (subject.user == "$LIVE_USER") { return polkit.Result.YES; }
+});
+RULES
+
+# 3. Session: X11 inside VirtualBox (best guest-utilities support),
+#    Wayland everywhere else. Falls back to whatever exists.
+SESSION=""
+if [ "$(systemd-detect-virt 2>/dev/null || true)" = "oracle" ] && [ -f /usr/share/xsessions/plasmax11.desktop ]; then
+    SESSION=plasmax11.desktop
+elif [ -f /usr/share/wayland-sessions/plasma.desktop ]; then
+    SESSION=plasma.desktop
+elif [ -f /usr/share/xsessions/plasmax11.desktop ]; then
+    SESSION=plasmax11.desktop
+fi
+
+mkdir -p /etc/sddm.conf.d
+cat > /etc/sddm.conf.d/90-live-autologin.conf <<CONF
+[Autologin]
+User=$LIVE_USER
+Session=$SESSION
+Relogin=false
+CONF
+
+# 4. "Install @@OS_NAME@@" icon on the live desktop.
+HOME_DIR="$(getent passwd "$LIVE_USER" | cut -d: -f6)"
+if [ -n "$HOME_DIR" ] && [ -d "$HOME_DIR" ]; then
+    install -d -o "$LIVE_USER" -g "$LIVE_USER" "$HOME_DIR/Desktop"
+    install -m 0755 -o "$LIVE_USER" -g "$LIVE_USER" \
+        /usr/share/applications/@@OS_ID@@-install.desktop "$HOME_DIR/Desktop/"
+fi

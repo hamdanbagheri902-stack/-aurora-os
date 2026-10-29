@@ -1,0 +1,4 @@
+#!/bin/sh
+# auto/build — run by "lb build". build.sh already logs the output.
+set -e
+lb build noauto "${@}"

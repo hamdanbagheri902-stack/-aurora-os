@@ -1,0 +1,7 @@
+# Mouse, keyboard and touchpad support for X11 and Wayland.
+# (Kernel HID drivers ship with the kernel; the initramfs list is in
+#  includes.chroot/usr/share/initramfs-tools/modules.d/)
+xserver-xorg
+xserver-xorg-input-libinput
+libinput-tools
+libinput-bin

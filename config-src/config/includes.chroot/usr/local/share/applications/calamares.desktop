@@ -1,0 +1,6 @@
+[Desktop Entry]
+# Hides the stock Calamares menu entry; use "Install @@OS_NAME@@" instead.
+Type=Application
+Name=Calamares
+Exec=calamares
+NoDisplay=true

@@ -1,0 +1,30 @@
+#!/bin/sh
+# target-cleanup — Calamares step "shellprocess@cleanup", the last one.
+# Runs INSIDE the installed system (chroot), after GRUB is installed.
+set -eu
+ESP=/boot/efi
+
+# 1. UEFI fallback path that keeps Secure Boot working even if the PC
+#    forgets its boot entry: \EFI\BOOT\BOOTX64.EFI = shim -> GRUB.
+if [ -f "$ESP/EFI/debian/shimx64.efi" ]; then
+    mkdir -p "$ESP/EFI/BOOT"
+    cp -f "$ESP/EFI/debian/shimx64.efi" "$ESP/EFI/BOOT/BOOTX64.EFI"
+    cp -f "$ESP/EFI/debian/grubx64.efi" "$ESP/EFI/BOOT/grubx64.efi"
+    [ -f "$ESP/EFI/debian/mmx64.efi" ] && cp -f "$ESP/EFI/debian/mmx64.efi" "$ESP/EFI/BOOT/mmx64.efi"
+    echo "target-cleanup: installed Secure Boot fallback loader"
+elif [ -f "$ESP/EFI/debian/grubx64.efi" ]; then
+    mkdir -p "$ESP/EFI/BOOT"
+    cp -f "$ESP/EFI/debian/grubx64.efi" "$ESP/EFI/BOOT/BOOTX64.EFI"
+    echo "target-cleanup: installed fallback loader (no shim found)"
+fi
+
+# 2. Remove live-session-only files from the installed system.
+systemctl disable @@OS_ID@@-live-setup.service >/dev/null 2>&1 || true
+rm -f /etc/systemd/system/@@OS_ID@@-live-setup.service \
+      /usr/bin/@@OS_ID@@-install \
+      /usr/share/applications/@@OS_ID@@-install.desktop \
+      /usr/local/share/applications/calamares.desktop
+rm -rf /usr/lib/@@OS_ID@@-installer/debs
+# keep touchpad-tap (used by the autostart entry); drop the installer scripts
+rm -f /usr/lib/@@OS_ID@@-installer/live-setup /usr/lib/@@OS_ID@@-installer/target-prepare
+rm -f "$0"

@@ -1,0 +1,37 @@
+#!/bin/sh
+# 0200 — VirtualBox guest utilities (clipboard, auto-resize, shared folders).
+# VirtualBox is not part of Debian 13, so we try Debian's "fasttrack" repo.
+# Never fatal: the mouse works without this thanks to the USB Tablet device.
+set -e
+[ "@@VBOX_GUEST@@" = "yes" ] || { echo "I: VBOX_GUEST=no, skipping"; exit 0; }
+export DEBIAN_FRONTEND=noninteractive
+LIST=/etc/apt/sources.list.d/fasttrack.sources
+
+undo() {
+    echo "W: VirtualBox guest utilities NOT installed ($1). Continuing without them."
+    rm -f "$LIST"
+    apt-get update -qq || true
+    exit 0
+}
+
+apt-get install -y fasttrack-archive-keyring || undo "fasttrack-archive-keyring unavailable"
+KEY="$(dpkg -L fasttrack-archive-keyring | grep -E '/usr/share/keyrings/.*\.(gpg|asc|pgp)$' | head -n1 || true)"
+SIGNED=""
+[ -n "$KEY" ] && SIGNED="Signed-By: $KEY"
+
+cat > "$LIST" <<SRC
+Types: deb
+URIs: @@DEBIAN_MIRROR@@
+Suites: trixie-backports
+Components: main contrib
+
+Types: deb
+URIs: http://fasttrack.debian.net/debian-fasttrack/
+Suites: trixie-fasttrack trixie-backports-staging
+Components: main contrib
+$SIGNED
+SRC
+
+apt-get update || undo "fasttrack repository not reachable"
+apt-get install -y virtualbox-guest-utils virtualbox-guest-x11 || undo "no trixie packages in fasttrack"
+echo "I: VirtualBox guest utilities installed"
